@@ -5,51 +5,32 @@ var users = require("../../models/users");
 //allusers
 router.get('/', async (req, res) => {
     let user = await users.find();
-    return res.send(user);
+    return res.json(user);
 });
 //specifi user
-router.get('/:id', async (req, res) => {
-    try {
-        let user = await users.findById(req.params.id);
-        if (!user) return res.status(404).send("User with given id Not found...");
-        return res.send(user);
-    } catch (err) {
-        return res.status(404).send('invalid id');
-    }
+router.get('/:email', async (req, res) => {
+    let user = await users.find({ email: req.params.email });
+    if (user.length === 0) return res.status(404).send(`User with email ${req.params.email} not found`);
+    return res.json(user);
 });
 
-// var { name, email, address } = req.body;
-//         data = await users.findByIdAndUpdate(req.params.id, {
-//             name, email, address
-//         });
-//         await data.save().then(()=>{
-//             res.status(200).json({ message :"user updated successfully"})
-//         });
 //update a user
-router.put('/:id', async (req, res) => {
-    try {
-        let user = await users.findById(req.params.id);
-        if (!user) return res.status(404).send("User with given id Not found...");
-        user.name = req.body.name;
-        user.email = req.body.email;
-        user.address = req.body.address;
-        await user.save();
-        return res.send(user);
-    } catch (err) {
-        return res.status(404).send('invalid id');
-    }
+router.put('/:email', async (req, res) => {
+    let user = await users.findOne({ email: req.params.email });
+    if (!user) return res.status(404).send(`User with email ${req.params.email} not found`);
+    user.name = req.body.name;
+    user.email = req.body.email;
+    user.address = req.body.address;
+    await user.save();
+    return res.json(user);
 })
 
 
 //delete a user
-router.delete('/:id', async (req, res) => {
-    try {
-        let user = await users.findByIdAndDelete(req.params.id);
-        if (!user) return res.status(404).send("User with given id Not found...");
-        return res.send(user);
-    } catch (err) {
-        return res.status(404).send('invalid id');
-    }
+router.delete('/:email', async (req, res) => {
+    let user = await users.findOneAndDelete({ email: req.params.email });
+    if (!user) return res.status(404).send(`User with email ${req.params.email} not found`);
+    return res.json(user);
 })
 
 
@@ -60,6 +41,6 @@ router.post('/', async (req, res) => {
     user.email = req.body.email;
     user.address = req.body.address;
     await user.save();
-    return res.send(user);
+    return res.json(user);
 })
 module.exports = router;
